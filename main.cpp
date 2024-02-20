@@ -1,8 +1,6 @@
 #include <iostream>
 #include <cstring>
 #include <stack>
-#include <algorithm>
-#include <map>
 
 constexpr char SQUO_BRACKET = '[';
 constexpr char FIGO_BRACKET = '{';
@@ -12,9 +10,6 @@ constexpr char FIGC_BRACKET = '}';
 constexpr char ROUC_BRACKET = ')';
 constexpr char ERROR = '!';
 constexpr char SPACE = ' ';
-constexpr char EMPTY = 'E';
-
-using Brackets = std::map<char, std::stack<char>>; 
 
 char get_close_bracket(char bracket)
 {
@@ -35,11 +30,10 @@ char get_close_bracket(char bracket)
     }
     return brack_type;
 }
-
+// в прошлом коммите есть реализация с std::map<char, std::stack<char>>, но этот вероятнее самый лучший вариант
 bool is_brackets_paired(const std::string & sqcs)
 {
-    Brackets bracks;
-    char curr_brack{ERROR};
+    std::stack<char> brackets;// better option
     for(const char & i : sqcs)
     {
         if(i == SPACE)
@@ -47,19 +41,18 @@ bool is_brackets_paired(const std::string & sqcs)
         char temp = get_close_bracket(i);
         if(temp != ERROR)
         {
-            curr_brack = temp;
-            bracks[curr_brack].push(i);
+            brackets.push(temp);
         }
-        else if((curr_brack == EMPTY || curr_brack == i) && bracks[i].size())
+        else if(brackets.size() != 0 && brackets.top() == i)
         {
-            bracks[i].pop();
-            curr_brack = EMPTY;    
+            brackets.pop();
         }
         else
+        {
             return false;
+        }
     }
-    auto iter = std::find_if(bracks.cbegin(), bracks.cend(), [](auto & brack){ return brack.second.size(); });
-    return iter == bracks.cend();
+    return brackets.size() == 0;
 }
 
 int main(int argc, char **argv)
